@@ -17,14 +17,68 @@ import * as _ from 'ramda';
 
 
 
+// const Clocktick = React.createClass({
+
+
+
+// 	getInitialState(){
+// 		const date = new Date();
+// 		const hours = date.getHours();
+// 		const minutes = date.getMinutes();
+// 		const seconds = date.getSeconds();
+// 		return ({hours, minutes, seconds});
+// 	},
+
+// 	render() {
+// 		return( <span>
+// 			<p>{this.state.hours}:
+// 			{this.state.minutes}:
+// 			{this.state.seconds}</p>
+
+// 			</span>
+// 			)
+// 	},
+
+// 	componentDidMount(){
+// 		setInterval(this.clock, 1000);
+// 	}
+// });
 
 
 
 
+class Clock extends React.Component{
+
+	render(){
+
+		let elapsed = Math.round(this.props.elapsed / 100);
+
+		let seconds = parseInt(elapsed /10);
+		return <h1>{this.props.speaker} started {seconds} seconds ago</h1>
+	}
 
 
 
 
+}
+
+//takes a match, a callback
+//returns a function that will do the callback if the input matches match
+const onlyIf = _.curry((match, callback) => {
+	return _.cond([
+		[match, callback],
+		[_.T, _.identity]
+	]);
+});
+
+
+const speakingLens = _.lensProp('speaking');
+
+const activeSpeakers = _.filter(_.prop('speaking'));
+
+const silenceAll = _.map(_.set(speakingLens, false));
+
+const chatter = _.map(_.set(speakingLens, true));
 
 
 export default class TalkerApp extends React.Component {
@@ -32,20 +86,48 @@ export default class TalkerApp extends React.Component {
     constructor(){
 		super()
 		this.state = {
-		startTalk: Date.now(),
-  		speakers: [{name: 'Silence'},{name: 'Conor'},{name: 'Sanj'}]
+			start: Date.now(),
+	  		speakers: [{name: 'Silence', speaking: true},{name: 'Conor', speaking: false},{name: 'Sanj', speaking: false}],
+	  		elapsed: 0
 		}
-		}
+	}
+
+	componentDidMount(){
+		this.timer = setInterval(this.tick, 1000)
+	}
+
+	tick(){
+		this.setState({elapsed: new Date() - this.state.start})
+	}
 
 
-	startConvo(){
-		let end = Date.now()
-		let time = Math.floor((end - this.state.startTalk) / 1000)
-		alert(time);
+	restartConvo(){
+		this.setState({start: Date.now()})
 		}
 
 	speak(speaker){
-		alert(speaker.name);
+		const toggleSpeaking = _.over(speakingLens, _.not);
+
+		const namelens = _.lensProp('name')
+		const newNames = _.over(namelens, _.add('hey'))
+
+
+		var onlycon = onlyIf(_.compose(_.equals('Conor'), get('name')), newNames);
+		var onlyspeaker = onlyIf(_.equals(speaker))
+
+
+		var togglespeaker = _.map(toggleSpeaking)
+
+		var namechange = _.map(onlyspeaker(toggleSpeaking));
+		var newspeakers = namechange(this.state.speakers);
+
+
+		this.setState({speakers: newspeakers});
+	}
+
+	silence(){
+		var newspeakers = silenceAll(this.state.speakers)
+		this.setState({speakers: newspeakers});
 	}
 
 
@@ -53,16 +135,43 @@ export default class TalkerApp extends React.Component {
 
 
     	return (
+
         <View title="Talking Stick">
-          <Button onTap={this.startConvo}>Start Timer</Button>
-          <h1>The Timer Would Go Here</h1>
           {this.state.speakers.map(s => {
-            return  <Button onTap={speak(s)}>{s.name}</Button>
-          })}
+
+          	let ticker = (s.speaking)? <Clock speaker={s.name} elapsed={this.state.elapsed} /> : <p>silent</p>;
+
+            return(<div>
+            <Button onTap={this.speak.bind(this, s)}>{s.name}</Button>
+    		{ticker}
+            </div>
+          )})}
+
+          <Button color="red" onTap={this.silence}>Silence</Button>
+    	  <Button onTap={this.reststartConvo}>Start Timer</Button>
         </View>
         );
     }
 }
+
+
+
+const get = _.curry((property, object) => object[property]);
+
+
+const ifSpeaking = (callback) => {
+	return _.cond([
+  		[get('speaking'), (speaker) => {return callback(speaker)}]
+	]);
+}
+
+const logIfSpeaking = ifSpeaking((s) => {return s.name});
+
+const returnIfSpeaking = (object) => ifSpeaking((s) => {return object} );
+
+const clockIfSpeaking = returnIfSpeaking(<Clock start={Date.now()} speaker={'Bob'}/>)
+
+
 // function yieldFloor(userA = Silence, userB){
 //     let now = Date.now()
 //     userA.speeches.push(endSpeech(userA.started, now));
