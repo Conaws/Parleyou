@@ -72,13 +72,12 @@ const onlyIf = _.curry((match, callback) => {
 });
 
 
+
 const speakingLens = _.lensProp('speaking');
 
-const activeSpeakers = _.filter(_.prop('speaking'));
+		const namelens = _.lensProp('name')
+const newNames = _.over(namelens, _.add('hey'))
 
-const silenceAll = _.map(_.set(speakingLens, false));
-
-const chatter = _.map(_.set(speakingLens, true));
 
 
 export default class TalkerApp extends React.Component {
@@ -86,46 +85,57 @@ export default class TalkerApp extends React.Component {
     constructor(){
 		super()
 		this.state = {
+			ticking: true,
 			start: Date.now(),
+			currentLog: [],
 	  		speakers: [{name: 'Silence', speaking: true},{name: 'Conor', speaking: false},{name: 'Sanj', speaking: false}],
 	  		elapsed: 0
 		}
 	}
 
 	componentDidMount(){
+
 		this.timer = setInterval(this.tick, 1000)
 	}
 
 	tick(){
-		this.setState({elapsed: new Date() - this.state.start})
+		if (this.state.ticking){
+			var sinceStart = new Date() - this.state.start;
+			var timeonfloor = _.reduce(_.add, sinceStart, this.state.currentLog)
+
+			this.setState({elapsed: timeonfloor});
+		}
 	}
 
-
 	restartConvo(){
-		this.setState({start: Date.now()})
+		this.setState({start: Date.now(), currentLog: [], ticking: true})
+	}
+
+	pause(){
+		var thislog = new Date() - this.state.start;
+		this.setState({currentLog: this.state.currentLog.concat(thislog), ticking: false});
 		}
+	
+	resume(){
+		this.setState({start: new Date(), ticking: true});
+	}
 
 	speak(speaker){
 		const toggleSpeaking = _.over(speakingLens, _.not);
 
-		const namelens = _.lensProp('name')
-		const newNames = _.over(namelens, _.add('hey'))
-
-
-		var onlycon = onlyIf(_.compose(_.equals('Conor'), get('name')), newNames);
+		
 		var onlyspeaker = onlyIf(_.equals(speaker))
 
-
-		var togglespeaker = _.map(toggleSpeaking)
-
-		var namechange = _.map(onlyspeaker(toggleSpeaking));
-		var newspeakers = namechange(this.state.speakers);
+		var newspeakers = _.map(onlyspeaker(toggleSpeaking))(this.state.speakers);
 
 
 		this.setState({speakers: newspeakers});
 	}
 
 	silence(){
+		
+		const silenceAll = _.map(_.set(speakingLens, false));
+
 		var newspeakers = silenceAll(this.state.speakers)
 		this.setState({speakers: newspeakers});
 	}
@@ -133,13 +143,16 @@ export default class TalkerApp extends React.Component {
 
     render() {
 
+    	let alt = (this.state.ticking)? <Button onTap={this.pause}>Pause</Button> : <Button color="green" onTap={this.resume}>Resume</Button>
+
+
 
     	return (
 
         <View title="Talking Stick">
           {this.state.speakers.map(s => {
 
-          	let ticker = (s.speaking)? <Clock speaker={s.name} elapsed={this.state.elapsed} /> : <p>silent</p>;
+          	let ticker = (s.speaking)? <Clock speaker={s.name} elapsed={this.state.elapsed} /> : '';
 
             return(<div>
             <Button onTap={this.speak.bind(this, s)}>{s.name}</Button>
@@ -148,7 +161,9 @@ export default class TalkerApp extends React.Component {
           )})}
 
           <Button color="red" onTap={this.silence}>Silence</Button>
-    	  <Button onTap={this.reststartConvo}>Start Timer</Button>
+    	  {alt}
+    	  <Button onTap={this.restartConvo}>Restart</Button>
+
         </View>
         );
     }
