@@ -7,6 +7,14 @@ import * as _ from 'ramda';
 
 class Clock extends React.Component{
 
+	shouldComponentUpdate(){
+		return true;
+	}
+
+	componentWillRecieveProps(){
+
+	}
+
 	render(){
 
 		let elapsed = Math.round(this.props.elapsed / 100);
@@ -18,7 +26,7 @@ class Clock extends React.Component{
 
 		let seconds = time % 60 ;
 
-		return <h3>{this.props.speaker} has held the floor for {minutes()}{seconds} seconds</h3>
+		return <h3>{this.props.speaker} has held the floor for {this.props.elapsed} seconds</h3>
 	}
 
 
@@ -78,8 +86,6 @@ export default class TalkerApp extends React.Component {
 	}
 
 	tick(){
-		//maps over all the speakers and ticks the ones who are ticking
-
 
 
 
@@ -89,33 +95,26 @@ export default class TalkerApp extends React.Component {
 		var newElapsed = _.reduce(_.add, sinceStart, currentlog);
 	
 
-		// var timeonfloor = function(speaker){
-		// 	var sinceStart = new Date() - speaker.started;
-		// 	_.compose(_.reduce(_.add, sinceStart, speaker.currentLog));
-		// }
-
-
+		//maps over all the speakers and ticks the ones who are ticking
 		let changespeakers = _.map(onlyIf(get('speaking'), addTime), this.state.speakers);
-
-
+		
 		if (this.state.ticking){
-			this.setState({elapsed: newElapsed});
-			this.setState({speakers: changespeakers});
+			this.setState({elapsed: newElapsed ,speakers: changespeakers});
 		}
 	}
 
-	restartConvo(){
-		this.setState({started: Date.now(), currentLog: [], ticking: true})
-	}
+	// restartConvo(){
+	// 	this.setState({started: Date.now(), currentLog: [], ticking: true})
+	// }
 
-	pause(){
-		var thislog = new Date() - this.state.start;
-		this.setState({currentLog: this.state.currentLog.concat(thislog), ticking: false});
-		}
+	// pause(){
+	// 	var thislog = new Date() - this.state.start;
+	// 	this.setState({currentLog: this.state.currentLog.concat(thislog), ticking: false});
+	// 	}
 	
-	resume(){
-		this.setState({started: new Date(), ticking: true});
-	}
+	// resume(){
+	// 	this.setState({started: new Date(), ticking: true});
+	// }
 
 	speak(speaker){
 		const toggleSpeaking = _.over(speakingLens, _.not);
@@ -164,8 +163,6 @@ export default class TalkerApp extends React.Component {
     		{ticker}
             </div>
           )})}
-    	  {alt}
-    	  <Button onTap={this.restartConvo}>Restart</Button>
 
         </View>
         );
@@ -177,17 +174,6 @@ export default class TalkerApp extends React.Component {
 const get = _.curry((property, object) => object[property]);
 
 
-const ifSpeaking = (callback) => {
-	return _.cond([
-  		[get('speaking'), (speaker) => {return callback(speaker)}]
-	]);
-}
-
-const logIfSpeaking = ifSpeaking((s) => {return s.name});
-
-const returnIfSpeaking = (object) => ifSpeaking((s) => {return object} );
-
-const clockIfSpeaking = returnIfSpeaking(<Clock start={Date.now()} speaker={'Bob'}/>)
 
 
 // function yieldFloor(userA = Silence, userB){
