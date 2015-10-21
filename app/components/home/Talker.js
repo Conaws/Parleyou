@@ -4,29 +4,41 @@ import * as _ from 'ramda';
 
 
 
+// ::int -> string
+const prettyTime = (timeinSec) => {
+
+	let hours = (timeinSec > 3600)? parseInt(timeinSec / 3600) : 0;
+	timeinSec = timeinSec - (hours * 3600);
+	let minutes = (timeinSec > 60)? parseInt(timeinSec / 60) : 0;
+	let seconds = timeinSec % 60;
+
+	let val = `${seconds} seconds`
+	if (minutes > 0) val = `${minutes} minutes`.concat(" ", val);
+	if (hours > 0) val = `${hours} hours`.concat(" ", val);
+	return val;
+}
+
+
+
+
+const divStyle = {
+
+	outline: {
+		borderStyle: 'solid',
+		borderWidth: 5,
+		borderColor: 'green',
+		height: 20,
+	}
+}
+
+
+
 
 class Clock extends React.Component{
 
-	shouldComponentUpdate(){
-		return true;
-	}
-
-	componentWillRecieveProps(){
-
-	}
-
 	render(){
 
-		let elapsed = Math.round(this.props.elapsed / 100);
-		let time = parseInt(elapsed /10);
-		let minutes = () => {
-			let m = parseInt(time /60)
-			return (m > 0)? `${m} minutes and `: '';
-		}
-
-		let seconds = time % 60 ;
-
-		return <h3>{this.props.speaker} has held the floor for {this.props.elapsed} seconds</h3>
+		return <h3>{this.props.speaker} has held the floor for {prettyTime(this.props.elapsed)}</h3>
 	}
 
 
@@ -48,7 +60,6 @@ const onlyIf = _.curry((match, callback) => {
 const speakingLens = _.lensProp('speaking');
 
 const namelens = _.lensProp('name');
-
 
 const newNames = _.over(namelens, _.add('h'));
 
@@ -75,8 +86,9 @@ export default class TalkerApp extends React.Component {
 			currentLog: [],
 	  		speakers: [{name: 'Carlos', started: null, currentSpeech: 0, currentLog: [], speaking: false},
 	  		{name: 'Conor', started: null, currentSpeech: 0, currentLog: [], speaking: false},
-	  		{name: 'Sanj', started: null, currentSpeech: 0, currentLog: [], speaking: false}],
-	  		elapsed: 0
+	  		{name: 'Sanj', started: null, currentSpeech: 3700, currentLog: [], speaking: false}],
+	  		currentSpeech: 0,
+	  		silence: 0
 		}
 	}
 
@@ -87,19 +99,18 @@ export default class TalkerApp extends React.Component {
 
 	tick(){
 
+		let someoneSpeaking = _.any(get('speaking'));
 
+		//should add one to silence or else return the value of silence
+		let newSilence = someoneSpeaking(this.state.speakers)? this.state.silence : 1 + this.state.silence 
 
-		
-		var sinceStart = (new Date() - this.state.started);
-		var currentlog = this.state.currentLog
-		var newElapsed = _.reduce(_.add, sinceStart, currentlog);
-	
+		//only adds1, the check happens below
+		let newElapsed = _.add(1, this.state.currentSpeech)
 
 		//maps over all the speakers and ticks the ones who are ticking
 		let changespeakers = _.map(onlyIf(get('speaking'), addTime), this.state.speakers);
-		
 		if (this.state.ticking){
-			this.setState({elapsed: newElapsed ,speakers: changespeakers});
+			this.setState({currentSpeech: newElapsed ,speakers: changespeakers, silence: newSilence});
 		}
 	}
 
@@ -107,14 +118,15 @@ export default class TalkerApp extends React.Component {
 	// 	this.setState({started: Date.now(), currentLog: [], ticking: true})
 	// }
 
-	// pause(){
-	// 	var thislog = new Date() - this.state.start;
-	// 	this.setState({currentLog: this.state.currentLog.concat(thislog), ticking: false});
-	// 	}
+	pause(){
+		var thislog = new Date() - this.state.start;
+		this.setState({currentLog: this.state.currentLog.concat(thislog), ticking: false});
+		}
 	
-	// resume(){
-	// 	this.setState({started: new Date(), ticking: true});
-	// }
+	resume(){
+
+		this.setState({started: new Date(), ticking: true});
+	}
 
 	speak(speaker){
 		const toggleSpeaking = _.over(speakingLens, _.not);
@@ -129,7 +141,6 @@ export default class TalkerApp extends React.Component {
 
 		this.setState({speakers: newspeakers(this.state.speakers)});
 	}
-
 
 
 
@@ -151,8 +162,8 @@ export default class TalkerApp extends React.Component {
     	return (
 
         <View title="Talking Stick">
-        <Clock speaker={"Silence"} elapsed={this.state.elapsed} />
-
+        	<b>Conversation Length: {prettyTime(this.state.currentSpeech)}</b>
+        	<b>Time in Silence: {prettyTime(this.state.silence)}</b>
 
           {this.state.speakers.map(s => {
 
@@ -160,6 +171,9 @@ export default class TalkerApp extends React.Component {
 
             return(<div>
             <Button onTap={this.speak.bind(this, s)}>{s.name}</Button>
+            <div style={Object.assign(divStyle.outline, {height: 25})}>
+            	<div style={Object.assign({}, divStyle.outline, {height: "100%", borderColor: 'black', borderWidth: 1, width: "50%"})}></div>
+            </div>
     		{ticker}
             </div>
           )})}
