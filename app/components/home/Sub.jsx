@@ -1,18 +1,24 @@
-import { React, View, BackButton } from 'reapp-kit';
+import { React, View, Button, BackButton } from 'reapp-kit';
+
+import * as _ from 'ramda';
 
 export default class extends React.Component {
+	constructor(props){
+		super(props)
+	}
+
+
   render() {
+
     const backButton =
       <BackButton onTap={() => window.history.back()} />
+    const Child = this.props.child;
 
     return (
-      <View {...this.props} title="Sub Route" titleLeft={backButton}>
-        <p>Hello, from the sub route!</p>
-        <p>You can drag from the left side of the screen to drag this view back out</p>
-        <p>Ready to deploy? Run <code>reapp build</code> and check your build directory</p>
+      <View {...this.props} title='Production Points' titleLeft={backButton}>
+       	<Button onTap={() => this.router().transitionTo('/talker')}>Boo</Button>
+       	{Child && Child.toString()}
       </View>
     );
   }
 }
-
-

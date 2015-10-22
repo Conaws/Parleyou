@@ -4,24 +4,6 @@ import * as _ from 'ramda';
 
 
 
-
-const storageSetter = _.curry(function(key, value){ return localStorage[key] = value });
-const storageGetter = _.curry(function(key){return localStorage[key]});
-// setLocalJSON("Brave New World")({brave: "new world"});
-const setLocalJSON = (term) => {return _.compose(storageSetter(term), JSON.stringify)}
-const getLocalJSON = _.compose(JSON.parse, storageGetter);
-
-
-const setLocalState = (data) => setLocalJSON("state")(data);
-const getLocalState = () => getLocalJSON("state");
-
-
-
-const initSpeaker = (speakerName) => ({name: speakerName, started: null, currentSpeech: 0, currentLog: [], speaking: false})
-
-
-
-
 // ::int -> string
 const prettyTime = (timeinSec) => {
 
@@ -103,7 +85,9 @@ export default class TalkerApp extends React.Component {
 			ticking: true,
 			started: Date.now(),
 			currentLog: [],
-	  		speakers: getLocalJSON("activespeakers").map(s => initSpeaker(s)),
+	  		speakers: [{name: 'Carlos', started: null, currentSpeech: 0, currentLog: [], speaking: false},
+	  		{name: 'Conor', started: null, currentSpeech: 0, currentLog: [], speaking: false},
+	  		{name: 'Sanj', started: null, currentSpeech: 0, currentLog: [], speaking: false}],
 	  		currentSpeech: 0,
 	  		silence: 0
 		}
@@ -156,21 +140,10 @@ export default class TalkerApp extends React.Component {
 		// //not neccisary for current version		
 		// var speaknow = startSpeaking(new Date());
 
-		//silence
-		const silenceAll = _.map(_.set(speakingLens, false));
+		var newspeakers = _.map(onlyspeaker(toggleSpeaking));
 		
-		//Only one person can speak at a time now
-		var newspeakers = (speaker.speaking)? _.map(onlyspeaker(toggleSpeaking)) :  _.map(_.cond([[_.equals(speaker), _.set(speakingLens, true)],[_.T, _.set(speakingLens, false)]]));
-
 
 		this.setState({speakers: newspeakers(this.state.speakers)});
-	}
-
-
-	componentWillMount(){
-		const initialSpeakers = getLocalJSON("activespeakers") || ["Sample"];
-
-		console.log(initialSpeakers);
 	}
 
 

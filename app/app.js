@@ -3,6 +3,10 @@ import { router, route } from 'reapp-kit';
 
 router(require,
   route('home', '/',
-    route('sub'), route('talker')
+    route('sub',
+    	route('hey')
+    ),
+    route('convo'), 
+    route('talker')
   )
 );
