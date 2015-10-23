@@ -32,7 +32,7 @@ const divStyle ={
     display: 'none'
   },
   list: {
-
+    marginBottom: 12
   }
 }
 
@@ -117,17 +117,19 @@ export default class Conversation extends React.Page {
       <BackButton onTap={() => window.history.back()} />
 
     return (
-      <View {...this.props} title="Sub Route" titleLeft={backButton}>
+      <View {...this.props} title="Track Conversation" titleLeft={backButton}>
           <b style={(this.state.speakers == 0)? divStyle.hidden : divStyle.list}>Participants</b>
           {this.state.speakers}
 
-        <h1>Add Participants</h1>
-          <Input ref="name" onChange={this.filterSpeaker} onKeyUp={this.searchKeyPress.bind(this)}placeholder="Person's Name"/>
+        <h1 style={{marginLeft: "auto", marginRight: "auto"}}>Add Participants</h1>
+          <Input style={{marginBottom: 12}} ref="name" onChange={this.filterSpeaker} onKeyUp={this.searchKeyPress.bind(this)}placeholder="Person's Name"/>
           <b style={(this.state.suggestions == 0)? divStyle.hidden : divStyle.list}>Suggestions</b>
           {this.state.suggestions.map((s, index) => {
-            return <a tabindex={index+1} onKeyUp={this.searchKeyPress.bind(this)} onClick={this.addSpeaker.bind(event, s.toString(), s.toString())}><b>{s}</b></a>
+            return <a style={{marginBottom: 1}} tabindex={index+1} onKeyUp={this.searchKeyPress.bind(this)} onClick={this.addSpeaker.bind(event, s.toString(), s.toString())}><b>{s}</b></a>
           })}
+          <div style={{marginBottom: 12}}/>
           <Button ref="addButton" onTap={this.addSpeaker}>Add Participant</Button>
+          <div style={{marginBottom: 3}}/>
           <Button style={(this.state.speakers == 0)? divStyle.hidden : divStyle.list} ref="startConvo" onTap={this.startConvo}>Start Conversation</Button>
       </View>
     );

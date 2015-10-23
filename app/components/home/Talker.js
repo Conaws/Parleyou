@@ -43,7 +43,7 @@ const divStyle = {
 	outline: {
 		borderStyle: 'solid',
 		borderWidth: 1,
-		borderColor: 'black',
+		//borderColor: 'blue',
 		height: 20,
 		marginBottom: 10
 	},
@@ -209,13 +209,14 @@ export default class TalkerApp extends React.Component {
 
           {this.state.speakers.map(s => {
 
-          	let ticker = (s.speaking)? <Clock speaker={s.name} elapsed={s.currentSpeech} /> : '';
+          	let ticker = (s.speaking)? <Clock speaker={s.name} elapsed={s.currentSpeech} /> : <div style={{marginBottom: 12}}/>;
 
             return(<div>
-            <Button onTap={this.speak.bind(this, s)}>{s.name}</Button>
-            <div style={Object.assign(divStyle.outline, {height: 25})}>
-            	<div style={Object.assign({}, {height: "100%", width: `${percentSpeaking(s)}%`, backgroundColor: 'green'})}></div>
+            <Button style={{marginBottom: 10}} onTap={this.speak.bind(this, s)}>{s.name}
+            <div style={Object.assign(divStyle.outline, {height: 15, borderRadius: 5, marginTop: 5, marginBottom: 4, minWidth: 70})}>
+            	<div style={Object.assign({}, {height: "100%", width: `${percentSpeaking(s)}%`, backgroundColor: (percentSpeaking(s) < 80)? 'green' : 'red'})}></div>
             </div>
+            </Button>
     		{ticker}
             </div>
           )})}

@@ -1,4 +1,4 @@
-import { Reapp, React, NestedViewList, View, Button } from 'reapp-kit';
+import { Reapp, React, NestedViewList, View, Button, Container } from 'reapp-kit';
 // import {Talker} from './Talker.js';
 
 import Conversation from './home/Sub';
@@ -20,13 +20,18 @@ class Home extends React.Component{
   render() {
     return (
       <NestedViewList {...this.props.viewListProps}>
-        <View title="Create A New Convesation">
+        <View title="Welcome To Parley">
+          <div style={{marginLeft: "auto", marginRight: "auto", fontSize: 40, marginTop: 20, marginBottom: 20}}>
+          <b>Hard Data</b>
+          <b>Soft Skills</b>
+          </div>
+          
           <Button onTap={() => this.router().transitionTo('convo')}>
-            Start A New Conversation
+            Track A New Conversation
           </Button>
-          <Button onTap={() => this.router().transitionTo('sub')}>
+          {/*<Button onTap={() => this.router().transitionTo('sub')}>
             Histories
-          </Button>
+          </Button>*/}
         </View>
         {this.props.child()}
       </NestedViewList>
