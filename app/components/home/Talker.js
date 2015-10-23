@@ -4,12 +4,13 @@ import * as _ from 'ramda';
 
 
 
+let logger = (x) => {console.log(x); return x};
 
 const storageSetter = _.curry(function(key, value){ return localStorage[key] = value });
-const storageGetter = _.curry(function(key){return localStorage[key]});
+const storageGetter = _.curry(function(key){return localStorage[key] || "[]"});
 // setLocalJSON("Brave New World")({brave: "new world"});
 const setLocalJSON = (term) => {return _.compose(storageSetter(term), JSON.stringify)}
-const getLocalJSON = _.compose(JSON.parse, storageGetter);
+const getLocalJSON = _.compose( JSON.parse, storageGetter);
 
 
 const setLocalState = (data) => setLocalJSON("state")(data);
@@ -92,14 +93,13 @@ const get = _.curry((property, object) => object[property]);
 
 
 
-let logger = (x) => {console.log(x); return x};
 
 
 export default class TalkerApp extends React.Component {
 
     constructor(props){
 		super(props)
-		this.state = {
+		this.state = _.hasIn("1", getLocalJSON("activeconvo"))? getLocalJSON("activeconvo") : {
 			ticking: true,
 			started: Date.now(),
 			currentLog: [],
@@ -168,11 +168,17 @@ export default class TalkerApp extends React.Component {
 
 
 	componentWillMount(){
-		const initialSpeakers = getLocalJSON("activespeakers") || ["Sample"];
-
-		console.log(initialSpeakers);
+		//shows that gettingLocalJSON for something with no value will return empty array
+		// const initialSpeakers = getLocalJSON("acties") || ["Sample"];
+		// console.log("boom" + initialSpeakers);
 	}
 
+
+	save(){
+		let myhistory = getLocalJSON("History");
+		setLocalJSON("History")(myhistory.concat(this.state));
+		this.router().transitionTo('/');
+	}
 
 
 	// silence(){
@@ -193,7 +199,7 @@ export default class TalkerApp extends React.Component {
     	}
 
     	const backButton =
-    	  <BackButton onTap={() => window.history.back()} />
+    	  <BackButton onTap={this.save} />
 
     	return (
 

@@ -16,8 +16,6 @@ const getLocalState = () => getLocalJSON("state");
 
 const logger = (x) => {console.log(x); return x};
 
-setLocalState({speakers: ["Conor", "Sanjena"]});
-
 
 
 const addSpeaker = (speaker, state) => {
@@ -50,8 +48,7 @@ export default class Conversation extends React.Page {
   }
 
   addSpeaker(event, suggestion){
-    let user = logger(suggestion) || this.refs.name.getDOMNode().value;
-    console.log('hello' + user);
+    let user = suggestion || this.refs.name.getDOMNode().value;
     let newspeakers = this.state.speakers.concat(user);
     this.refs.name.getDOMNode().value = '';
     let localspeakers = getLocalJSON("speakers")? getLocalJSON("speakers") : [];
@@ -130,7 +127,7 @@ export default class Conversation extends React.Page {
           {this.state.suggestions.map((s, index) => {
             return <a tabindex={index+1} onKeyUp={this.searchKeyPress.bind(this)} onClick={this.addSpeaker.bind(event, s.toString(), s.toString())}><b>{s}</b></a>
           })}
-          <Button ref="addButton" onTap={this.addSpeaker}>Boom</Button>
+          <Button ref="addButton" onTap={this.addSpeaker}>Add Participant</Button>
           <Button style={(this.state.speakers == 0)? divStyle.hidden : divStyle.list} ref="startConvo" onTap={this.startConvo}>Start Conversation</Button>
       </View>
     );
