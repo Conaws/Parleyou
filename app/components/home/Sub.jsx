@@ -1,13 +1,8 @@
 import { React, View, Button, BackButton } from 'reapp-kit';
-
+import divStyle from '../styles';
 import * as _ from 'ramda';
+import {getLocalJSON, setLocalJSON} from '../simpleStorage';
 
-
-const storageSetter = _.curry(function(key, value){ return localStorage[key] = value });
-const storageGetter = _.curry(function(key){return localStorage[key] || "[]"});
-// setLocalJSON("Brave New World")({brave: "new world"});
-const setLocalJSON = (term) => {return _.compose(storageSetter(term), JSON.stringify)}
-const getLocalJSON = _.compose( JSON.parse, storageGetter);
 
 
 

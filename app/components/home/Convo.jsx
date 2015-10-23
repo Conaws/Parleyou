@@ -1,40 +1,9 @@
-import { React, View, BackButton, Button, List, Input, Label, SearchBar} from 'reapp-kit';
+import { React, View, BackButton, Button, List, Card, Input} from 'reapp-kit';
 import * as _ from 'ramda';
+import divStyle, {paint} from '../styles';
+import {getLocalJSON, setLocalJSON, logger} from '../simpleStorage';
 
 
-
-const storageSetter = _.curry(function(key, value){ return localStorage[key] = value });
-const storageGetter = _.curry(function(key){return localStorage[key] || "[]" });
-// setLocalJSON("Brave New World")({brave: "new world"});
-const setLocalJSON = (term) => {return _.compose(storageSetter(term), JSON.stringify)}
-const getLocalJSON = _.compose(JSON.parse, storageGetter);
-
-
-const setLocalState = (data) => setLocalJSON("state")(data);
-const getLocalState = () => getLocalJSON("state");
-
-
-const logger = (x) => {console.log(x); return x};
-
-
-
-const addSpeaker = (speaker, state) => {
-  let speakers = state.speakers;
-  let newspeakers = speakers.concat(speaker)
-  let newState = Object.assign(state, {speakers: newspeakers})
-  return newState;
-}
-
-
-
-const divStyle ={
-  hidden: {
-    display: 'none'
-  },
-  list: {
-    marginBottom: 12
-  }
-}
 
 
 
@@ -50,8 +19,9 @@ export default class Conversation extends React.Page {
   addSpeaker(event, suggestion){
     let user = suggestion || this.refs.name.getDOMNode().value;
     let newspeakers = this.state.speakers.concat(user);
+
     this.refs.name.getDOMNode().value = '';
-    let localspeakers = getLocalJSON("speakers")? getLocalJSON("speakers") : [];
+    let localspeakers = getLocalJSON("speakers");
     setLocalJSON("speakers")(_.uniq(localspeakers.concat(user)));
     this.setState({speakers: _.uniq(newspeakers), suggestions: []});
   }
@@ -106,7 +76,6 @@ export default class Conversation extends React.Page {
     let suggestions = () => {
       if(this.state.suggestions > 0){
       return <List >Suggestions
-
         </List>
       }
       else
@@ -118,25 +87,27 @@ export default class Conversation extends React.Page {
 
     return (
       <View {...this.props} title="Track Conversation" titleLeft={backButton}>
-          <b style={(this.state.speakers == 0)? divStyle.hidden : divStyle.list}>Participants</b>
-          {this.state.speakers}
-
-        <h1 style={{marginLeft: "auto", marginRight: "auto"}}>Add Participants</h1>
-          <Input style={{marginBottom: 12}} ref="name" onChange={this.filterSpeaker} onKeyUp={this.searchKeyPress.bind(this)}placeholder="Person's Name"/>
-          <b style={(this.state.suggestions == 0)? divStyle.hidden : divStyle.list}>Suggestions</b>
-          {this.state.suggestions.map((s, index) => {
-            return <a style={{marginBottom: 1}} tabindex={index+1} onKeyUp={this.searchKeyPress.bind(this)} onClick={this.addSpeaker.bind(event, s.toString(), s.toString())}><b>{s}</b></a>
-          })}
-          <div style={{marginBottom: 12}}/>
-          <Button ref="addButton" onTap={this.addSpeaker}>Add Participant</Button>
-          <div style={{marginBottom: 3}}/>
-          <Button style={(this.state.speakers == 0)? divStyle.hidden : divStyle.list} ref="startConvo" onTap={this.startConvo}>Start Conversation</Button>
+          
+        <div style={paint(divStyle.center, {width: 250})}>
+          <h1 style={paint(divStyle.center)}>Add Participants</h1>
+          <b style={(this.state.speakers == 0)? divStyle.hidden : divStyle.centerDiv}>Participants</b>
+            {speakers(this.state.speakers)}
+            
+            <Input style={{marginBottom: 12, marginTop: 12}} ref="name" onChange={this.filterSpeaker} onKeyUp={this.searchKeyPress.bind(this)}placeholder="Name"/>
+            
+            <b style={(this.state.suggestions == 0)? divStyle.hidden : divStyle.list}>Suggestions</b>
+            {this.state.suggestions.map((s, index) => {
+              return <a style={{marginBottom: 1}} tabindex={index+1} onKeyUp={this.searchKeyPress.bind(this)} onClick={this.addSpeaker.bind(event, s.toString(), s.toString())}><b>{s}</b></a>
+            })}
+            <div style={{marginBottom: 12}}/>
+            <Button ref="addButton" onTap={this.addSpeaker}>Add Participant</Button>
+            <div style={{marginBottom: 3}}/>
+            <Button style={(this.state.speakers == 0)? divStyle.hidden : divStyle.list} ref="startConvo" onTap={this.startConvo}>Start Conversation</Button>
+        </div>
       </View>
     );
   }
 }
 
-// <p>Ready to deploy? Run <code>reapp build</code> and check your build directory</p>
 
-
-
+const speakers = _.map((s, i) => {return <div key={i} style={divStyle.centerDiv}>{s}</div>})

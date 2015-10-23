@@ -1,15 +1,10 @@
 import { Reapp, React, NestedViewList, View, Button, Container } from 'reapp-kit';
 // import {Talker} from './Talker.js';
+import {getLocalJSON, setLocalJSON, logger} from './simpleStorage';
+import {paint, center, centerDiv, hero, border} from './styles';
 
 import Conversation from './home/Sub';
 import * as _ from 'ramda';
-
-
-const storageSetter = _.curry(function(key, value){ return localStorage[key] = value });
-const storageGetter = _.curry(function(key){return localStorage[key] || "[]"});
-// setLocalJSON("Brave New World")({brave: "new world"});
-const setLocalJSON = (term) => {return _.compose(storageSetter(term), JSON.stringify)}
-const getLocalJSON = _.compose( JSON.parse, storageGetter);
 
 
 class Home extends React.Component{
@@ -21,14 +16,18 @@ class Home extends React.Component{
     return (
       <NestedViewList {...this.props.viewListProps}>
         <View title="Welcome To Parley">
-          <div style={{marginLeft: "auto", marginRight: "auto", fontSize: 40, marginTop: 20, marginBottom: 20}}>
-          <b>Hard Data</b>
-          <b>Soft Skills</b>
+          <div style={paint(centerDiv, hero)}>
+          <b >Speak Less</b>
+          <b >Say More</b>
           </div>
+          <div style={centerDiv}>
+          <p style={center}>Track your speaking habits and use hard data to improve your soft skills</p>
+          
           
           <Button onTap={() => this.router().transitionTo('convo')}>
-            Track A New Conversation
+            New Conversation
           </Button>
+          </div>
           {/*<Button onTap={() => this.router().transitionTo('sub')}>
             Histories
           </Button>*/}

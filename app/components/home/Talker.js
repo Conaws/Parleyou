@@ -1,24 +1,42 @@
-import { React, View, Button, BackButton } from 'reapp-kit';
+import { React, View, Button, BackButton, Modal, Card} from 'reapp-kit';
+import divStyle from '../styles.js';
+
+const paint = divStyle.paint;
 
 import * as _ from 'ramda';
+import {getLocalJSON, setLocalJSON, addToHistory} from '../simpleStorage';
+import {get, onlyIf, logger} from '../../ramdahelpers.js';
 
 
 
-let logger = (x) => {console.log(x); return x};
-
-const storageSetter = _.curry(function(key, value){ return localStorage[key] = value });
-const storageGetter = _.curry(function(key){return localStorage[key] || "[]"});
-// setLocalJSON("Brave New World")({brave: "new world"});
-const setLocalJSON = (term) => {return _.compose(storageSetter(term), JSON.stringify)}
-const getLocalJSON = _.compose( JSON.parse, storageGetter);
 
 
-const setLocalState = (data) => setLocalJSON("state")(data);
-const getLocalState = () => getLocalJSON("state");
+const CTG = React.addons.CSSTransitionGroup;
 
 
 
+//helpers
 const initSpeaker = (speakerName) => ({name: speakerName, started: null, currentSpeech: 0, currentLog: [], speaking: false})
+const speakingLens = _.lensProp('speaking');
+const namelens = _.lensProp('name');
+const newNames = _.over(namelens, _.add('h'));
+const addTime = _.over(_.lensProp('currentSpeech'), _.add(1));
+
+
+
+
+
+
+
+
+
+
+
+const instructions = (speakers) => {
+	let nums = _.map(get('currentSpeech'),(speakers));
+	if (_.reduce(_.add, 0, nums) == 0)
+		return <h1>Click on a Participant To Track The Time They Spend Speaking</h1>
+}
 
 
 
@@ -38,61 +56,14 @@ const prettyTime = (timeinSec) => {
 }
 
 
-const divStyle = {
-
-	outline: {
-		borderStyle: 'solid',
-		borderWidth: 1,
-		//borderColor: 'blue',
-		height: 20,
-		marginBottom: 10
-	},
-
-	bottomSpacing: {
-		marginBottom: 10
-	}
-}
-
 
 
 
 class Clock extends React.Component{
-
 	render(){
-
 		return <div style={divStyle.bottomSpacing}><b>{this.props.speaker} has held the floor for {prettyTime(this.props.elapsed)}</b></div>
 	}
-
 }
-
-//takes a match, a callback
-//returns a function that will do the callback if the input matches match
-const onlyIf = _.curry((match, callback) => {
-	return _.cond([
-		[match, callback],
-		[_.T, _.identity]
-	]);
-});
-
-
-
-const speakingLens = _.lensProp('speaking');
-
-const namelens = _.lensProp('name');
-
-const newNames = _.over(namelens, _.add('h'));
-
-const addTime = _.over(_.lensProp('currentSpeech'), _.add(1));
-
-
-const get = _.curry((property, object) => object[property]);
-
-
-
-
-
-
-
 
 
 export default class TalkerApp extends React.Component {
@@ -167,16 +138,10 @@ export default class TalkerApp extends React.Component {
 	}
 
 
-	componentWillMount(){
-		//shows that gettingLocalJSON for something with no value will return empty array
-		// const initialSpeakers = getLocalJSON("acties") || ["Sample"];
-		// console.log("boom" + initialSpeakers);
-	}
 
 
 	save(){
-		let myhistory = getLocalJSON("History");
-		setLocalJSON("History")(myhistory.concat(this.state));
+		addToHistory(this.state);
 		this.router().transitionTo('/');
 	}
 
@@ -204,6 +169,8 @@ export default class TalkerApp extends React.Component {
     	return (
 
         <View {...this.props} title="Conversation" titleLeft={backButton}>
+        <CTG>
+        	{instructions(this.state.speakers)}
         	<b>Conversation Length: {prettyTime(this.state.currentSpeech)}</b>
         	<b>Time in Silence: {prettyTime(this.state.silence)}</b>
 
@@ -222,6 +189,7 @@ export default class TalkerApp extends React.Component {
           )})}
           	<br/>
           {alt}
+        </CTG>
         </View>
         );
     }
