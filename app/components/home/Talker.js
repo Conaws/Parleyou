@@ -1,17 +1,17 @@
 import { React, View, Button, BackButton, Modal, Card} from 'reapp-kit';
-import divStyle from '../styles.js';
+import divStyle, {paint} from '../styles';
 
-const paint = divStyle.paint;
+require('velocity-animate/velocity.ui');
+
+import {VelocityTransitionGroup, velocityHelpers} from 'velocity-react';
 
 import * as _ from 'ramda';
 import {getLocalJSON, setLocalJSON, addToHistory} from '../simpleStorage';
-import {get, onlyIf, logger} from '../../ramdahelpers.js';
+import {get, onlyIf, logger, prettyTime} from '../../ramdahelpers.js';
+import {speakers, tickers} from './convo/Transition'
 
 
-
-
-
-const CTG = React.addons.CSSTransitionGroup;
+console.log(Velocity.RegisterEffect);
 
 
 
@@ -24,9 +24,11 @@ const addTime = _.over(_.lensProp('currentSpeech'), _.add(1));
 
 
 
-
-
-
+class Clock extends React.Component{
+  render(){
+    return <div style={divStyle.bottomSpacing}><b>{this.props.speaker} has held the floor for {prettyTime(this.props.elapsed)}</b></div>
+  }
+}
 
 
 
@@ -35,35 +37,15 @@ const addTime = _.over(_.lensProp('currentSpeech'), _.add(1));
 const instructions = (speakers) => {
 	let nums = _.map(get('currentSpeech'),(speakers));
 	if (_.reduce(_.add, 0, nums) == 0)
-		return <h1>Click on a Participant To Track The Time They Spend Speaking</h1>
+		return <p>Click on a Participant To Track The Time They Spend Speaking</p>
 }
 
 
 
 
 // ::int -> string
-const prettyTime = (timeinSec) => {
-
-	let hours = (timeinSec > 3600)? parseInt(timeinSec / 3600) : 0;
-	timeinSec = timeinSec - (hours * 3600);
-	let minutes = (timeinSec > 60)? parseInt(timeinSec / 60) : 0;
-	let seconds = timeinSec % 60;
-
-	let val = `${seconds} seconds`
-	if (minutes > 0) val = `${minutes} minutes`.concat(" ", val);
-	if (hours > 0) val = `${hours} hours`.concat(" ", val);
-	return val;
-}
 
 
-
-
-
-class Clock extends React.Component{
-	render(){
-		return <div style={divStyle.bottomSpacing}><b>{this.props.speaker} has held the floor for {prettyTime(this.props.elapsed)}</b></div>
-	}
-}
 
 
 export default class TalkerApp extends React.Component {
@@ -159,9 +141,7 @@ export default class TalkerApp extends React.Component {
 
     	let alt = (this.state.ticking)? <Button color="red" onTap={this.pause}>Pause</Button> : <Button color="green" onTap={this.resume}>Resume</Button>
 
-    	const percentSpeaking = (speaker) => {
-    		return (speaker.currentSpeech > 0)? (speaker.currentSpeech/ this.state.currentSpeech) * 100 : 0;
-    	}
+    
 
     	const backButton =
     	  <BackButton onTap={this.save} />
@@ -169,33 +149,71 @@ export default class TalkerApp extends React.Component {
     	return (
 
         <View {...this.props} title="Conversation" titleLeft={backButton}>
-        <CTG>
-        	{instructions(this.state.speakers)}
-        	<b>Conversation Length: {prettyTime(this.state.currentSpeech)}</b>
-        	<b>Time in Silence: {prettyTime(this.state.silence)}</b>
 
-          {this.state.speakers.map(s => {
+	    	
+	    	<div style={divStyle.centerDiv}>
+	    	<b>Conversation Length: {prettyTime(this.state.currentSpeech)}</b>
+	    	<b>Time in Silence: {prettyTime(this.state.silence)}</b>
+	    	{instructions(this.state.speakers)}
+	    	</div>
 
-          	let ticker = (s.speaking)? <Clock speaker={s.name} elapsed={s.currentSpeech} /> : <div style={{marginBottom: 12}}/>;
-
-            return(<div>
-            <Button style={{marginBottom: 10}} onTap={this.speak.bind(this, s)}>{s.name}
-            <div style={Object.assign(divStyle.outline, {height: 15, borderRadius: 5, marginTop: 5, marginBottom: 4, minWidth: 70})}>
-            	<div style={Object.assign({}, {height: "100%", width: `${percentSpeaking(s)}%`, backgroundColor: (percentSpeaking(s) < 80)? 'green' : 'red'})}></div>
-            </div>
-            </Button>
-    		{ticker}
-            </div>
-          )})}
+	      {this.state.speakers.map(s => {
+	      	return <Speaker total={this.state.currentSpeech} speak={this.speak} s={s} count={this.state.speakers.length}/>
+	      	})}
           	<br/>
           {alt}
-        </CTG>
         </View>
         );
     }
 }
 
 
+
+
+
+
+
+class Speaker extends React.Component{
+
+
+
+	render(){
+	let total = this.props.total;
+	let s = this.props.s;
+	
+	const perc = (a, b) =>  (a > 0)? (a/b) * 100 : 0;
+	
+
+	
+	
+
+	//let ticker = (s.speaking)? <Clock speaker={s.name} elapsed={s.currentSpeech} /> : <div style={{marginBottom: 12}}/>;
+
+	        return(<div style={{marginBottom: 10}}>
+		        <Button style={{height: `${(400/this.props.count)}`}} onTap={this.props.speak.bind(this, s)}>
+		        {s.name}
+		        <div 
+		        	style={Object.assign(
+		        		divStyle.outline, 
+		        		{height: 15, 
+	        			borderRadius: 5, 
+	        			marginTop: 5, 
+	        			marginBottom: 4, 
+	        			minWidth: 70})}>
+		        	<div style={Object.assign({}, 
+		        		{height: "100%", 
+		        		width: `${perc(s.currentSpeech, total)}%`, 
+		        		backgroundColor: (perc(s.currentSpeech, total) < 80)? 'green' : 'red'})}>
+		        	</div>
+		        </div>
+		        <div style= {{margin: 2, borderRadius: 5, padding: 5, color: (s.speaking)? 'red' : null }}>
+		        	{prettyTime(s.currentSpeech)}
+		        </div>
+		        </Button>
+            </div>
+          );
+	}
+}
 
 
 

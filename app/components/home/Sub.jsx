@@ -4,7 +4,7 @@ import * as _ from 'ramda';
 import {getLocalJSON, setLocalJSON} from '../simpleStorage';
 
 
-
+import Velocity from 'velocity-animate';
 
 
 

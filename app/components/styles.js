@@ -5,6 +5,8 @@ var assign = curry((a, b) => Object.assign(a, b));
 
 
 
+let paint = (...styles) => reduce(assign(), {})(styles);
+
 const divStyle = {
   border:  {
     borderStyle: 'solid',
@@ -25,17 +27,13 @@ const divStyle = {
   hidden: {
     display: 'none'
   },
-
-  list: {
-    marginBottom: 12
-  },
   center: {
     marginLeft: 'auto',
     marginRight: 'auto',
     textAlign: 'center'
   },
   centerDiv: {
-    width: window.innerWidth * 0.5,
+    width: 300,
     marginLeft: 'auto',
     marginRight: 'auto',
     textAlign: 'center'
@@ -57,8 +55,6 @@ const divStyle = {
 
   paint: (...styles) => reduce(assign(), {})(styles)
 }
-
-
 
 //var colors = [{blue: "blue"}, {red: "greeen"}],
 //paint(colors),

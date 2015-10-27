@@ -5,6 +5,7 @@ import {paint, center, centerDiv, hero, border} from './styles';
 
 import Conversation from './home/Sub';
 import * as _ from 'ramda';
+import Velocity from 'velocity-animate';
 
 
 class Home extends React.Component{

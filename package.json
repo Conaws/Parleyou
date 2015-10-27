@@ -1,18 +1,23 @@
 {
-  "author": "Your Name Here",
-  "name": "flickr",
+  "author": "Conor White",
+  "name": "Parley",
   "repository": "",
-  "description": "",
+  "description": "Speak Less, Say More, Keep Track of How Much You Talk",
   "version": "1.0.0",
   "main": "./app/app.js",
   "reapp": "0.8",
   "scripts": {
     "test": "",
-    "start": "reapp run"
+    "start": "reapp run",
+    "deploy": "surge -d parley.surge.sh"
   },
   "dependencies": {
+    "jquery": "^2.1.4",
     "ramda": "^0.18.0",
     "react": "0.13.2",
-    "reapp-kit": "^1.2.0"
+    "react-motion": "^0.3.1",
+    "reapp-kit": "^1.2.0",
+    "velocity-animate": "^1.2.3",
+    "velocity-react": "^1.0.1"
   }
 }
