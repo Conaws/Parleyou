@@ -4,7 +4,7 @@
 
 
 #Hypothesis:
-1. By building a single page web-app
+1. By building a single page web-app that
     +  Lets me keep track of the participants in a conversation
     +  Can show a visible ratio of how long each person has spent speaking.
     +  Only persists data to local storage
