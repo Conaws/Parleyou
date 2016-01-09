@@ -5,20 +5,20 @@
 
 #Hypothesis:
 1. By building a single page web-app
-    + A)  Lets me keep track of the participants in a conversation
-    + B)  Can show a visible ratio of how long each person has spent speaking.
-    + C)  Only persists data to local storage
-    + D)  Looks alright on mobile
+    +  Lets me keep track of the participants in a conversation
+    +  Can show a visible ratio of how long each person has spent speaking.
+    +  Only persists data to local storage
+    +  Looks alright on mobile
 
 2. I will be able to 
-    + A)  Make sure I'm not the most talkative
-    + B)  Take extra steps to pull the least talkative person out of their shell
-    + C)  Build an intuition for building apps in React. 
+    +  Make sure I'm not the most talkative
+    +  Take extra steps to pull the least talkative person out of their shell
+    +  Build an intuition for building apps in React. 
 
 
 #Solution:
 
-  npm install
-  reapp run
-  
-  or visit parleyou.com 
++   npm install
++   reapp run
++   or visit parleyou.com 
++   deployed via surge.sh, uses webpack, and reapp components (which are no longer maintained)
